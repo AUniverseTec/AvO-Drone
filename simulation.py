@@ -6,25 +6,25 @@ class DroneEnv(gym.Env):
     
     def __init__(self):
         super(DroneEnv, self).__init__()
-        # Определяем пространство действий: вперед, назад, влево, вправо
+        # Визначаємо простір дій: вперед, назад, ліворуч, праворуч
         self.action_space = gym.spaces.Discrete(4)  # 4 действия
         # Пространство состояний (например, положение дрона и препятствий)
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(5,), dtype=np.float32)
         
-        # Начальная позиция дрона
+        # Початкова позиція дрону
         self.state = np.array([0, 0, 0, 0, 0])  # x, y, z, скорость, расстояние до препятствия
         self.goal = np.array([10, 10, 5])  # Цель - конечная точка
     
     def reset(self):
-        """Сброс состояния дрона при начале нового эпизода"""
+        """Скидання стану дрону на початку нового епізоду"""
         self.state = np.array([0, 0, 0, 0, 0])
         return self.state
 
     def step(self, action):
-        """Применение действия к дрону и вычисление нового состояния"""
+        """Застосування дії до дрону та обчислення нового стану"""
         x, y, z, speed, obstacle_distance = self.state
         
-        # Обновляем положение дрона в зависимости от действия
+        # Оновлюємо положення дрона в залежності від дії
         if action == 0:  # вперед
             x += 1
         elif action == 1:  # назад
@@ -34,10 +34,10 @@ class DroneEnv(gym.Env):
         elif action == 3:  # вправо
             y += 1
         
-        # Считаем расстояние до цели
+        # Вважаємо відстань до мети
         distance_to_goal = np.linalg.norm(np.array([x, y, z]) - self.goal)
         
-        # Проверяем столкновение с препятствием
+        # Перевіряємо зіткнення з перешкодою
         if obstacle_distance < 1.0:
             reward = -100  # штраф за столкновение
             done = True
@@ -45,10 +45,10 @@ class DroneEnv(gym.Env):
             reward = -distance_to_goal  # вознаграждение основано на близости к цели
             done = distance_to_goal < 1.0  # если дрон достиг цели, эпизод заканчивается
         
-        # Обновляем состояние
+        # Оновлюємо стан
         self.state = np.array([x, y, z, speed, obstacle_distance])
         return self.state, reward, done, {}
 
     def render(self, mode='human'):
-        # Отображение среды для мониторинга
+        # Відображення середовища для моніторингу
         print(f"Drone position: {self.state}, Goal: {self.goal}")
